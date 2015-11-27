@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/context 
+       http://www.springframework.org/schema/context/spring-context-3.2.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+
+
+	<!-- 读取配置文件-->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:important.properties</value>
+			</list>
+		</property>
+	</bean>
+
+
+	<!-- 扫描其他各层，完成bean注入-->
+	<context:component-scan base-package="com.jiaohao.microproject.domain"/>
+    <context:component-scan base-package="com.jiaohao.microproject.service"/>
+
+
+
+	<!-- 配置数据源 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		<!--&lt;!&ndash; 初始化连接数量 &ndash;&gt;-->
+		<!--<property name="initialSize" value="3" />-->
+		<!--&lt;!&ndash; 最大活动连接数量 &ndash;&gt;-->
+		<!--<property name="maxActive" value="20" />-->
+		<!--&lt;!&ndash; 最大空闲连接数量 &ndash;&gt;-->
+		<!--<property name="maxIdle" value="5" />-->
+		<!--&lt;!&ndash; 最小空闲连接数量 &ndash;&gt;-->
+		<!--<property name="minIdle" value="3" />-->
+		<!--&lt;!&ndash; 获取连接时等待时间，超出将抛异常，单位毫秒 &ndash;&gt;-->
+		<!--<property name="maxWait" value="10000" />-->
+		<!-- 是否自动提交 拥有事务管理时，通常不自动提交-->
+		<property name="defaultAutoCommit" value="false" />
+		<!--&lt;!&ndash; 空闲连接被回收时间，回收空闲连接至minIdle指定数量，单位毫秒 &ndash;&gt;-->
+		<!--<property name="minEvictableIdleTimeMillis" value="1800000" />-->
+		<!--&lt;!&ndash; 检查空闲连接是否可被回收，如果小于等于0，不会启动检查线程，默认-1，单位毫秒 &ndash;&gt;-->
+		<!--<property name="timeBetweenEvictionRunsMillis" value="600000" />-->
+		<!--&lt;!&ndash; SQL查询,用来验证从连接池取出的连接 &ndash;&gt;-->
+		<!--<property name="validationQuery" value="select 2-1" />-->
+		<!--&lt;!&ndash; 指明连接是否被空闲连接回收器(如果有)进行检验.如果检测失败,则连接将被从池中去除 &ndash;&gt;-->
+		<!--<property name="testWhileIdle" value="true" />-->
+		<!--&lt;!&ndash; 指明是否在从池中取出连接前进行检验,如果检验失败, &ndash;&gt;-->
+		<!--<property name="testOnBorrow" value="false" />-->
+		<!--&lt;!&ndash; 指明是否在归还到池中前进行检验 &ndash;&gt;-->
+		<!--<property name="testOnReturn" value="false" />-->
+
+	</bean>
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+		p:dataSource-ref="dataSource" />
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:spring-mybatis.xml" />
+	</bean>
+
+	<aop:aspectj-autoproxy/>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+
+
+
+
+
+
+
+</beans>
